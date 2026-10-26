@@ -24,7 +24,6 @@ main{
 }
 
 .box-container{
-    background: rgb(128, 0, 0);
     user-select: none;
     width: 68.5%;
     height: 52%;
@@ -34,6 +33,19 @@ main{
     align-items: center;
     top: 16%;
     left: 15.5%;
+}
+
+.end-screen{
+    display: none;
+    width: 40%;
+    height: 50%;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px;
+    text-align: center;
+    position: absolute;
+    border-radius: 1vmax;
+    gap: 1vmax;
 }
 
 .menu-box{

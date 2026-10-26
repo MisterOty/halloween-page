@@ -140,17 +140,47 @@ const doDataCheck = (num) => {
     document.querySelector(`.click-${num}`).classList.add('selected')
     document.querySelector(`.click-${1 - num}`).classList.add('unselected')
     if(currentBudget[num] >= currentBudget[1 - num]){
+        console.log(movieList, listPos)
+        doCinemaFlash('right')
         listPos++
         setTimeout(() => {
             createCard(movieList)
         }, 1250);
     }else{
-        console.log('wrong')
+        doCinemaFlash('wrong')
+        setTimeout(() => {
+            doEndScreen()
+        }, 1250);
     }
     for(let i = 0; i < 2; i++){
         document.querySelector(`.click-${i} .movie-text`).style.bottom = `0%`;
         document.querySelector(`.click-${i}`).classList.remove('undecided')
     }
+}
+
+const doCinemaFlash = (type) => {
+    document.querySelector('.box-container').style.transition = `background-color 0s`
+    if(type == "right"){
+        document.querySelector('.box-container').style.backgroundColor = `rgba(0, 255, 0, 0.5)`
+    }else{
+        document.querySelector('.box-container').style.backgroundColor = `rgba(255, 0, 0, 0.5)`
+    }
+    setTimeout(() => {
+        document.querySelector('.box-container').style.transition = `background-color 0.5s`
+        document.querySelector('.box-container').style.backgroundColor = `rgba(0, 0, 0, 0)`
+    }, 500);
+
+}
+
+const doReset = () => {
+    movieList = []
+    document.querySelector('.menu-box').style.display = `flex`
+    document.querySelector('.end-screen').style.display = `none`
+}
+
+const doEndScreen = () => {
+    document.querySelector('.choice-menu').innerHTML = ``
+    document.querySelector('.end-screen').style.display = `flex`
 }
 
 document.querySelector('#enableMaxY').addEventListener('change', () => {
