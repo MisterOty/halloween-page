@@ -12,6 +12,12 @@ let maxYearEnable = false
 minInput.value = `${yearMin}`
 maxInput.value = `${yearMax}`
 
+let projectorClick = new Audio("files/audio/projector_click.mp3")
+let ambientSFX = new Audio("files/audio/projection_loop.mp3")
+let hoverSFX = new Audio("files/audio/image_hover.mp3")
+let rightSFX = new Audio("files/audio/image_correct.mp3")
+let wrongSFX = new Audio("files/audio/image_wrong.mp3")
+
 let listPos = 0
 let currentBudget = []
 
@@ -31,14 +37,9 @@ async function doStart(){
         movieList.push(...list); 
     }
     listLength = movieList.length
-    doPowerTurnOn()
     movieList = shuffleArray(movieList)
     createCard(movieList)
-    // console.log(movieList[random])
-    // console.log(movieList[random].poster_path)
-    // document.querySelector('img').src = `${imgBaseUrl}${movieList[random].poster_path}`
-    // document.querySelector('p').textContent = `${movieList[random].overview}`
-    // conS(movieList)
+    doPower('on')
 }
 
 async function getMovies(minY, maxY, num){
@@ -73,9 +74,22 @@ async function getMovieInfo(movie_id){
     }
 }
 
-async function conS(list) {
-    for(let i = 0; i < list.length; i++){
-        console.log(`${list[i].original_title}`)
+async function createCard(list){
+    currentBudget = []
+    document.querySelector('.choice-menu').innerHTML = ``
+    for(let i = 0; i < 2; i++){
+        let info = await getMovieInfo(list[i + listPos].id)
+        let budget = Number(info.budget).toLocaleString() + "$"
+        currentBudget.push(info.budget)
+        document.querySelector('.choice-menu').innerHTML += `
+            <div class="movie-select click-${i} undecided">
+                <div class="movie-image" style='background: url(${imgBaseUrl}${list[i + listPos].poster_path});background-size: 100% 100%;'></div>
+                <div class="movie-text">Budget: ${budget}</div>
+            </div>`
+        if(i == 1){
+            document.querySelector(`.click-${i} .movie-text`).style.bottom = `-15%`
+            console.log(budget)
+        }
     }
 }
 
@@ -109,44 +123,46 @@ const doCheck = () => {
     doStart()
 }
 
-const doPowerTurnOn = () => {
-    document.querySelector('.menu-box').style.display = `none`
-    document.querySelector('main').style.background = `url(files/images/cinema-light.png)`
-    document.querySelector('main').style.backgroundSize = `100% 100%`
-    document.querySelector('main').classList.add('do-flash')
-}
+const doPower = (type) => {
+    projectorClick.load()
+    projectorClick.play()
+    if(type == 'on'){
+        document.querySelector('.menu-box').style.display = `none`
+        document.querySelector('main').style.background = `url(files/images/cinema-light.png)`
+        document.querySelector('main').style.backgroundSize = `100% 100%`
+        document.querySelector('main').classList.add('do-flash')
+        ambientSFX.currentTime = 0
+        ambientSFX.loop = true
+        ambientSFX.play()
+    }else{
+        document.querySelector('.menu-box').style.display = `flex`
+        document.querySelector('main').style.background = `url(files/images/cinema-dark.png)`
+        document.querySelector('main').style.backgroundSize = `100% 100%`
+        document.querySelector('main').classList.remove('do-flash')
 
-async function createCard(list){
-    currentBudget = []
-    document.querySelector('.choice-menu').innerHTML = ``
-    for(let i = 0; i < 2; i++){
-        let info = await getMovieInfo(list[i + listPos].id)
-        let budget = Number(info.budget).toLocaleString() + "$"
-        console.log(info)
-        currentBudget.push(info.budget)
-        document.querySelector('.choice-menu').innerHTML += `
-            <div class="movie-select click-${i} undecided">
-                <div class="movie-image" style='background: url(${imgBaseUrl}${list[i + listPos].poster_path});background-size: 100% 100%;'></div>
-                <div class="movie-text">Budget: ${budget}</div>
-            </div>`
-        if(i == 1){
-            document.querySelector(`.click-${i} .movie-text`).style.bottom = `-15%`
-        }
+        ambientSFX.pause()
     }
-    console.log(currentBudget)
 }
 
 const doDataCheck = (num) => {
     document.querySelector(`.click-${num}`).classList.add('selected')
     document.querySelector(`.click-${1 - num}`).classList.add('unselected')
     if(currentBudget[num] >= currentBudget[1 - num]){
-        console.log(movieList, listPos)
+        rightSFX.load()
+        rightSFX.play()
         doCinemaFlash('right')
         listPos++
         setTimeout(() => {
-            createCard(movieList)
+            if(listPos !== movieList.length - 1){
+                createCard(movieList)
+            }else{
+                listPos++
+                doEndScreen()
+            }
         }, 1250);
     }else{
+        wrongSFX.load()
+        wrongSFX.play()
         doCinemaFlash('wrong')
         setTimeout(() => {
             doEndScreen()
@@ -173,14 +189,35 @@ const doCinemaFlash = (type) => {
 }
 
 const doReset = () => {
+    listPos = 0
     movieList = []
-    document.querySelector('.menu-box').style.display = `flex`
+    doPower('off')
     document.querySelector('.end-screen').style.display = `none`
 }
 
 const doEndScreen = () => {
+    let quote
+    let buttonText = 'Try Again?'
+    let shortQuote = "Don't give up yet!"
+    let quotes = ['Really?', 'Nice Try!', 'Good Attempt', 'Almost There!', 'Good Job!']
+    if(listPos == 0){
+        quote = quotes[0]
+    }else if(listPos >= movieList.length){
+        quote = quotes[4]
+        buttonText = 'Go Again?'
+        shortQuote = 'YOU DID IT!!!'
+    }else if(listPos >= movieList.length - 5){
+        quote = quotes[3]
+    }else if(listPos >= 10){
+        quote = quotes[2]
+    }else{
+        quote = quotes[1]
+    }
     document.querySelector('.choice-menu').innerHTML = ``
     document.querySelector('.end-screen').style.display = `flex`
+    document.querySelector('.end-screen h1').innerHTML = `(${listPos} / ${movieList.length}) ${quote}`
+    document.querySelector('.end-screen p').innerHTML = `${shortQuote}`
+    document.querySelector('.end-screen button').innerHTML = `${buttonText}`
 }
 
 document.querySelector('#enableMaxY').addEventListener('change', () => {
@@ -189,7 +226,16 @@ document.querySelector('#enableMaxY').addEventListener('change', () => {
     document.querySelector('.max-year-box').classList.toggle('toggle-on')
 })
 
+document.querySelector('.choice-menu').addEventListener('mouseover', (event) => {
+    if(event.target.classList[0] == 'movie-image'){
+        hoverSFX.load()
+        hoverSFX.play()
+    }
+})
+
 document.querySelector('.choice-menu').addEventListener('click', (event) => {
-    let clickedDiv = event.target.closest('.movie-select').classList[1].split('-')[1]
-    doDataCheck(clickedDiv)
+    if(event.target.closest('.movie-select').classList[2] == 'undecided'){
+        let clickedDiv = event.target.closest('.movie-select').classList[1].split('-')[1]
+        doDataCheck(clickedDiv)
+    }
 })
