@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="files/images/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <title>Halloween Page</title>
+</head>
+<body>
+    <main>
+        <div class="box-container">
+            <div class="menu-box">
+                <h1>Horror Movie (MORE/LESS)</h1>
+                <p>Try and guess which Horror Movie made more $$$</p>
+                <p class="settings-text">Horror Movie Year Range</p>
+                <div class="settings-box">
+                    <input type="checkbox" id="enableMaxY">
+                    <input type="number" id="min-year">
+                    <div class="max-year-box toggle-off">
+                        <p>-</p>
+                        <input type="number" id="max-year">
+                    </div>
+                </div>
+                <button onclick="doCheck()">Start</button>
+            </div>
+            <div class="choice-menu">
+            </div>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
